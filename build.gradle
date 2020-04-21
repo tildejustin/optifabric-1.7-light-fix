@@ -57,6 +57,7 @@ dependencies {
 		exclude module: "guava"
 	}
 	modCompile "com.github.Chocohead:Fabric-ASM:${project.fabric_asm_version}"
+
 	include "com.github.Chocohead:Fabric-ASM:${project.fabric_asm_version}"
 
 	//Used to handle the zip processing
