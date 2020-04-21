@@ -17,10 +17,6 @@ public class RemapUtils {
 		return TinyUtils.createTinyMappingProvider(mappings.toPath(), from, to);
 	}
 
-	public static void mapJar(Path output, Path input, File mappings, List<Path> libraries, String from, String to) throws IOException {
-		mapJar(output, input, getTinyRemapper(mappings, from, to), libraries);
-	}
-
 	public static void mapJar(Path output, Path input, IMappingProvider mappings, List<Path> libraries) throws IOException {
 		Files.deleteIfExists(output);
 

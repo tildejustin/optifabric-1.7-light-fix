@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -132,20 +133,18 @@ public class OptifineSetup {
 
 		classCache = PatchSplitter.generateClassCache(remappedJar, optifinePatches, modHash);
 
-		if(true){
-			//We are done, lets get rid of the stuff we no longer need
-			lambadaFixJar.delete();
-			jarOfTheFree.delete();
+		//We are done, lets get rid of the stuff we no longer need
+		lambadaFixJar.delete();
+		jarOfTheFree.delete();
 
-			if(OptifineVersion.jarType == OptifineVersion.JarType.OPTFINE_INSTALLER){
-				optifineModJar.delete();
-			}
-
-			File extractedMappings = new File(versionDir, "mappings.tiny");
-			File fieldMappings = new File(versionDir, "mappings.full.tiny");
-			extractedMappings.delete();
-			fieldMappings.delete();
+		if(OptifineVersion.jarType == OptifineVersion.JarType.OPTFINE_INSTALLER){
+			optifineModJar.delete();
 		}
+
+		File extractedMappings = new File(versionDir, "mappings.tiny");
+		File fieldMappings = new File(versionDir, "mappings.full.tiny");
+		extractedMappings.delete();
+		fieldMappings.delete();
 
 		boolean extractClasses = Boolean.parseBoolean(System.getProperty("optifabric.extract", "false"));
 		if(extractClasses){
@@ -233,7 +232,8 @@ public class OptifineSetup {
 		}
 		if (fabricLauncher.isDevelopment()) {
 			Path path = entrypointResult.get().getParent();
-			Path minecraftJar = path.resolve(String.format("minecraft-%s-client.jar", OptifineVersion.minecraftVersion)); //Lets hope you are using loom in dev
+//			Path minecraftJar = path.resolve(String.format("minecraft-%s-client.jar", OptifineVersion.minecraftVersion)); //Lets hope you are using loom in dev
+			Path minecraftJar = Paths.get("C:/Users/hayden/.gradle/caches/fabric-loom/minecraft-1.8.9-client.jar");
 			if (!Files.exists(minecraftJar)) {
 				throw new FileNotFoundException("Could not find minecraft jar!");
 			}

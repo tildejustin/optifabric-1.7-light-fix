@@ -19,7 +19,7 @@ public class MixinGameOptions {
 
 	@Shadow @Final private File optionsFile;
 
-	@Inject(method = "load", at = @At("RETURN"))
+	@Inject(method = "method_2336", at = @At("RETURN")) //method_2336 = load
 	private void load(CallbackInfo info) {
 		File optifabricOptions = new File(optionsFile.getParent(), "optifabric.txt");
 		if (!optifabricOptions.exists()) {

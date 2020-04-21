@@ -34,7 +34,11 @@ public class OptifineVersion {
 				if (file.getName().endsWith(".jar")) {
 					JarType type = getJarType(file);
 					if (type.error) {
-						throw new RuntimeException("An error occurred when trying to find the optifine jar: " + type.name());
+						if(!type.name().equals("INCOMPATIBE")){
+							throw new RuntimeException("An error occurred when trying to find the optifine jar: " + type.name());
+						}else{
+							continue;
+						}
 					}
 					if (type == JarType.OPIFINE_MOD || type == JarType.OPTFINE_INSTALLER) {
 						if(optifineJar != null){
@@ -59,7 +63,7 @@ public class OptifineVersion {
 	private static JarType getJarType(File file) throws IOException {
 		ClassNode classNode;
 		try (JarFile jarFile = new JarFile(file)) {
-			JarEntry jarEntry = jarFile.getJarEntry("net/optifine/Config.class"); // New 1.14.3 location
+			JarEntry jarEntry = jarFile.getJarEntry("Config.class"); // Pre 1.14.3 location
 			if (jarEntry == null) {
 				return JarType.SOMETHINGELSE;
 			}
@@ -79,19 +83,7 @@ public class OptifineVersion {
 			return JarType.INCOMPATIBE;
 		}
 
-		String currentMcVersion = "unknown";
-		try {
-			try(InputStream is = OptifineVersion.class.getResourceAsStream("/version.json")){
-				try(InputStreamReader isr = new InputStreamReader(is)){
-					JsonObject jsonObject = new Gson().fromJson(isr, JsonObject.class);
-					currentMcVersion = jsonObject.get("name").getAsString();
-				}
-			}
-		} catch (Exception e){
-			OptifabricError.setError("Failed to find minecraft version");
-			e.printStackTrace();
-			return JarType.INCOMPATIBE;
-		}
+		String currentMcVersion = "1.8.9";
 
 		if (!currentMcVersion.equals(minecraftVersion)) {
 			OptifabricError.setError(String.format("This version of optifine is not compatible with the current minecraft version\n\n Optifine requires %s you have %s", minecraftVersion, currentMcVersion));
