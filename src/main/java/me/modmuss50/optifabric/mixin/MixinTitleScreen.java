@@ -13,8 +13,7 @@ import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(TitleScreen.class)
@@ -34,6 +33,11 @@ public abstract class MixinTitleScreen extends Screen {
 		if (!OptifabricError.hasError()) {
 			this.drawString(MinecraftClient.getInstance().textRenderer, OptifineVersion.version, 2, this.height - 20, 0xFFFFFFFF);
 		}
+	}
+
+	@ModifyConstant(method = "render", constant = @Constant(stringValue = "Minecraft 1.8.9"))
+	private String yes(String string) {
+		return "Minecraft 1.8.9/Fabric";
 	}
 
 }
