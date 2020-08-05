@@ -34,10 +34,4 @@ public abstract class MixinTitleScreen extends Screen {
 			this.drawString(MinecraftClient.getInstance().textRenderer, OptifineVersion.version, 2, this.height - 20, 0xFFFFFFFF);
 		}
 	}
-
-	@ModifyConstant(method = "render", constant = @Constant(stringValue = "Minecraft 1.8.9"))
-	private String yes(String string) {
-		return "Minecraft 1.8.9/Fabric";
-	}
-
 }
