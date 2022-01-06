@@ -234,8 +234,8 @@ public class OptifineSetup {
 		}
 		if (fabricLauncher.isDevelopment()) {
 			Path path = entrypointResult.get().getParent();
-//			Path minecraftJar = path.resolve(String.format("minecraft-%s-client.jar", OptifineVersion.minecraftVersion)); //Lets hope you are using loom in dev
-			Path minecraftJar = Paths.get("C:/Users/hayden/.gradle/caches/fabric-loom/minecraft-1.8.9-client.jar");
+			Path minecraftJar = path.resolve(String.format("minecraft-%s-client.jar", OptifineVersion.minecraftVersion)); //Lets hope you are using loom in dev
+//			Path minecraftJar = Paths.get("C:/Users/hayden/.gradle/caches/fabric-loom/minecraft-1.8.9-client.jar");
 			if (!Files.exists(minecraftJar)) {
 				return getNewMinecraftDevJar();
 			}
