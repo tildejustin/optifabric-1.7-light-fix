@@ -1,5 +1,5 @@
 package me.modmuss50.optifabric.mixin;
-
+/*
 import com.google.common.collect.Iterators;
 import net.minecraft.util.TypeFilterableList;
 import org.spongepowered.asm.mixin.Final;
@@ -24,7 +24,7 @@ public abstract class MixinTypeFilterableList<T> {
 
     /**
      * @author hydos
-     */
+     *\/
     @Overwrite
     public <S> Iterable<S> method_10806(final Class<S> var1) {
         return () -> {
@@ -40,10 +40,13 @@ public abstract class MixinTypeFilterableList<T> {
 
     /**
      * @author hydos
-     */
+     *\/
     @Overwrite
     public Iterator<T> iterator() {
         return allElements.isEmpty() ? Collections.emptyIterator() : Iterators.unmodifiableIterator(allElements.iterator());
     }
 
 }
+*/
+
+//Not Working with 1.7

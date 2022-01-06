@@ -1,15 +1,14 @@
 package me.modmuss50.optifabric.mod;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import me.modmuss50.optifabric.patcher.ASMUtils;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.main.Main;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.zeroturnaround.zip.ZipUtil;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -21,7 +20,7 @@ public class OptifineVersion {
 	public static JarType jarType;
 
 	public static File findOptifineJar() throws IOException {
-		File modsDir = new File(FabricLoader.getInstance().getGameDirectory(), "mods");
+		File modsDir = FabricLoader.getInstance().getGameDir().resolve("mods").toFile();
 		File[] mods = modsDir.listFiles();
 
 		File optifineJar = null;
@@ -83,7 +82,7 @@ public class OptifineVersion {
 			return JarType.INCOMPATIBE;
 		}
 
-		String currentMcVersion = "1.8.9";
+		String currentMcVersion = "1.7.10";
 
 		if (!currentMcVersion.equals(minecraftVersion)) {
 			OptifabricError.setError(String.format("This version of optifine is not compatible with the current minecraft version\n\n Optifine requires %s you have %s", minecraftVersion, currentMcVersion));

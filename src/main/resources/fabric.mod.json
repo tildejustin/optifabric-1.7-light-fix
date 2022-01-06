@@ -33,7 +33,7 @@
   },
   "depends": {
     "fabricloader": ">=0.12.2",
-    "minecraft": ">=1.8.9"
+    "minecraft": "1.7.10"
   },
   "accessWidener": "optifabric.accesswidener"
 }

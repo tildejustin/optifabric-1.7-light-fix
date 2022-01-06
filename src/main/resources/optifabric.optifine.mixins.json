@@ -5,8 +5,7 @@
   "mixins": [
     "MixinReflectorClass",
     "MixinOptifineConfig",
-    "MixinGameOptions",
-    "MixinTypeFilterableList"
+    "MixinGameOptions"
   ],
   "injectors": {
     "defaultRequire": 1
