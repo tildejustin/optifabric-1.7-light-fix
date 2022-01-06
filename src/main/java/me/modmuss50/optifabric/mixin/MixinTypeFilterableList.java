@@ -18,7 +18,7 @@ public abstract class MixinTypeFilterableList<T> {
 
     @Shadow @Final private Map<Class<?>, List<T>> elementsByType;
 
-    @Shadow protected abstract Class<?> method_6407(Class<?> var1);
+    @Shadow protected abstract Class<?> method_10805(Class<?> var1);
 
     @Shadow @Final private List<T> allElements;
 
@@ -26,9 +26,9 @@ public abstract class MixinTypeFilterableList<T> {
      * @author hydos
      */
     @Overwrite
-    public <S> Iterable<S> method_6408(final Class<S> var1) {
+    public <S> Iterable<S> method_10806(final Class<S> var1) {
         return () -> {
-            List<T> list = elementsByType.get(method_6407(var1));
+            List<T> list = elementsByType.get(method_10805(var1));
             if (list == null) {
                 return Collections.emptyIterator();
             } else {

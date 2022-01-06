@@ -1,17 +1,13 @@
-buildscript {
-	repositories {
-		jcenter()
-		maven {
-			name = 'Fabric'
-			url = 'https://maven.fabricmc.net/'
-		}
-	}
-	dependencies {
-		classpath "net.fabricmc:fabric-loom:0.2.7-SNAPSHOT"
-	}
+//file:noinspection GroovyAssignabilityCheck
+//file:noinspection GradlePackageUpdate
+import net.fabricmc.loom.LoomGradlePlugin
+
+plugins {
+	id 'fabric-loom' version '0.7-SNAPSHOT'
+	id 'maven-publish'
 }
 
-apply plugin: net.fabricmc.loom.LoomGradlePlugin
+apply plugin: LoomGradlePlugin
 apply plugin: 'maven-publish'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -22,38 +18,30 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
+	maven {
+		name = "legacy-fabric"
+		url = "https://maven.legacyfabric.net"
+	}
 	mavenCentral()
 	maven {
 		name "Modmuss50 Repository"
 		url 'https://maven.fabricmc.net/'
 	}
 	maven { url 'https://jitpack.io' }
-	maven {
-		name = 'SpongePowered'
-		url = 'http://repo.spongepowered.org/maven'
-	}
-	maven {
-		name = 'mojang'
-		url = 'https://libraries.minecraft.net/'
-	}
-	maven {
-		name = 'legacy-fabric'
-		url = 'https://dl.bintray.com/legacy-fabric/Legacy-Fabric-Maven'
-	}
 }
 
 minecraft {
 	accessWidener = file("src/main/resources/optifabric.accesswidener")
 	intermediaryUrl = {
-		return "https://dl.bintray.com/legacy-fabric/Legacy-Fabric-Maven/net/fabricmc/intermediary/" + it + "/intermediary-" + it + "-v2.jar";
+		return "https://maven.legacyfabric.net/net/fabricmc/intermediary/${it}/intermediary-${it}-v2.jar"
 	}
 }
 
 dependencies {
-	compile "com.google.guava:guava:23.5-jre"
+	compile 'com.google.guava:guava:23.5-jre'
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modCompile ("net.fabricmc:fabric-loader-1.8.9:0.8.7+build.202006122116") {
+	modCompile ("net.fabricmc:fabric-loader:${project.loader_version}") {
 		exclude module: "guava"
 	}
 	modCompile "com.github.Chocohead:Fabric-ASM:${project.fabric_asm_version}"
@@ -105,7 +93,7 @@ tasks.withType(JavaCompile) {
 // if it is present.
 // If you remove this task, sources will not be generated.
 task sourcesJar(type: Jar, dependsOn: classes) {
-	classifier = "sources"
+	getArchiveClassifier().set("sources")
 	from sourceSets.main.allSource
 }
 

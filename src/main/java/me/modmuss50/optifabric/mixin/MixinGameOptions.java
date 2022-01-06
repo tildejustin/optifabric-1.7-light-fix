@@ -17,9 +17,10 @@ public class MixinGameOptions {
 
 	@Shadow public List<String> resourcePacks;
 
-	@Shadow @Final private File optionsFile;
+	@Shadow private File optionsFile;
 
-	@Inject(method = "method_2336", at = @At("RETURN")) //method_2336 = load
+	@SuppressWarnings("ResultOfMethodCallIgnored")
+	@Inject(method = "load", at = @At("RETURN")) //method_2336 = load
 	private void load(CallbackInfo info) {
 		File optifabricOptions = new File(optionsFile.getParent(), "optifabric.txt");
 		if (!optifabricOptions.exists()) {

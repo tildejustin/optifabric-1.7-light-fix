@@ -5,13 +5,13 @@ import me.modmuss50.optifabric.patcher.LambadaRebuiler;
 import me.modmuss50.optifabric.patcher.PatchSplitter;
 import me.modmuss50.optifabric.patcher.RemapUtils;
 import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.launch.common.FabricLauncher;
-import net.fabricmc.loader.launch.common.FabricLauncherBase;
-import net.fabricmc.loader.launch.common.MappingConfiguration;
-import net.fabricmc.loader.launch.knot.Knot;
-import net.fabricmc.loader.util.UrlConversionException;
-import net.fabricmc.loader.util.UrlUtil;
-import net.fabricmc.loader.util.mappings.TinyRemapperMappingsHelper;
+import net.fabricmc.loader.impl.launch.FabricLauncher;
+import net.fabricmc.loader.impl.launch.FabricLauncherBase;
+import net.fabricmc.loader.impl.launch.MappingConfiguration;
+import net.fabricmc.loader.impl.launch.knot.Knot;
+import net.fabricmc.loader.impl.util.UrlConversionException;
+import net.fabricmc.loader.impl.util.UrlUtil;
+import net.fabricmc.loader.impl.util.mappings.TinyRemapperMappingsHelper;
 import net.fabricmc.mapping.reader.v2.TinyMetadata;
 import net.fabricmc.mapping.tree.ClassDef;
 import net.fabricmc.mapping.tree.TinyTree;
@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,13 +40,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class OptifineSetup {
 
-	private File workingDir = new File(FabricLoader.getInstance().getGameDirectory(), ".optifine");
+	private final File workingDir = FabricLoader.getInstance().getGameDir().resolve(".optifine").toFile();
 	private File versionDir;
-	private MappingConfiguration mappingConfiguration = new MappingConfiguration();
+	private final MappingConfiguration mappingConfiguration = new MappingConfiguration();
 
-	private FabricLauncher fabricLauncher = FabricLauncherBase.getLauncher();
+	private final FabricLauncher fabricLauncher = FabricLauncherBase.getLauncher();
 
 
 	public Pair<File, ClassCache> getRuntime() throws Throwable {
@@ -215,7 +217,7 @@ public class OptifineSetup {
 		return fabricLauncher.getLoadTimeDependencies().stream().map(url -> {
 			try {
 				return UrlUtil.asPath(url);
-			} catch (UrlConversionException e) {
+			} catch (URISyntaxException e) {
 				throw new RuntimeException(e);
 			}
 		}).filter(Files::exists).collect(Collectors.toList());
@@ -266,7 +268,7 @@ public class OptifineSetup {
 			String classFilename = entrypointFilenames.get(i);
 			Optional<Path> classSourcePath = getSource(loader, classFilename);
 			if (classSourcePath.isPresent()) {
-				return Optional.of(classSourcePath.get());
+				return classSourcePath;
 			}
 		}
 
@@ -281,7 +283,7 @@ public class OptifineSetup {
 				Path classSourceFile = UrlUtil.asPath(urlSource);
 
 				return Optional.of(classSourceFile);
-			} catch (UrlConversionException e) {
+			} catch (UrlConversionException | URISyntaxException e) {
 				// TODO: Point to a logger
 				e.printStackTrace();
 			}
@@ -297,11 +299,15 @@ public class OptifineSetup {
 			extractedMappings.delete();
 		}
 		InputStream mappingStream = FabricLauncherBase.class.getClassLoader().getResourceAsStream("mappings/mappings.tiny");
-		FileUtils.copyInputStreamToFile(mappingStream, extractedMappings);
-		if (!extractedMappings.exists()) {
-			throw new RuntimeException("failed to extract mappings!");
+		if (mappingStream != null) {
+			FileUtils.copyInputStreamToFile(mappingStream, extractedMappings);
+			if (!extractedMappings.exists()) {
+				throw new RuntimeException("failed to extract mappings!");
+			}
+			return extractedMappings;
+		} else {
+			return null;
 		}
-		return extractedMappings;
 	}
 
 	byte[] fileHash(File input) throws IOException {
