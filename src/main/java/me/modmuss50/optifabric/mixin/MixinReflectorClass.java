@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 //Suppresses some warnings in the log
 @Pseudo
-@Mixin(targets = "optifine.ReflectorClass")
+@Mixin(targets = "ReflectorClass")
 public class MixinReflectorClass {
 
 	@Shadow
