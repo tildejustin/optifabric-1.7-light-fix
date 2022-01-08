@@ -15,6 +15,7 @@ public class OptifineFixer {
 	private List<String> skippedClass = new ArrayList<>();
 
 	private OptifineFixer() {
+		/*
 		//net/minecraft/client/render/chunk/ChunkBuilder$BuiltChunk
 		registerFix("class_851", new ChunkRendererFix());
 
@@ -38,6 +39,7 @@ public class OptifineFixer {
 
 		//net/minecraft/client/render/item/HeldItemRenderer$1
 		skipClass("class_759$1");
+		*/
 	}
 
 	private void registerFix(String className, ClassFixer classFixer) {
