@@ -1,14 +1,10 @@
 //file:noinspection GroovyAssignabilityCheck
 //file:noinspection GradlePackageUpdate
-import net.fabricmc.loom.LoomGradlePlugin
 
 plugins {
-	id 'fabric-loom' version '0.7-SNAPSHOT'
+	id 'fabric-loom' version "0.7-SNAPSHOT" // To use chocoloom, change the version to a commit hash
 	id 'maven-publish'
 }
-
-apply plugin: LoomGradlePlugin
-apply plugin: 'maven-publish'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
@@ -19,33 +15,29 @@ group = project.maven_group
 
 repositories {
 	maven {
-		name = "legacy-fabric"
-		url = "https://maven.legacyfabric.net"
+		name = "Legacy Rewoven"
+		url = "https://maven.rewovenmc.tk"
 	}
 	mavenCentral()
-	maven {
-		name "Modmuss50 Repository"
-		url 'https://maven.fabricmc.net/'
-	}
 	maven { url 'https://jitpack.io' }
 }
 
+// Comment out this block if you're using Chocoloom
+// Comment when using loom 0.10
 minecraft {
 	accessWidener = file("src/main/resources/optifabric.accesswidener")
 	intermediaryUrl = {
-		return "https://maven.legacyfabric.net/net/fabricmc/intermediary/${it}/intermediary-${it}-v2.jar"
+		return "https://maven.legacyfabric.net/net/fabricmc/intermediary/" + it + "/intermediary-" + it + "-v2.jar"
 	}
 }
 
 dependencies {
-	compile 'com.google.guava:guava:23.5-jre'
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modCompile ("net.fabricmc:fabric-loader:${project.loader_version}") {
-		exclude module: "guava"
-	}
-	modCompile "com.github.Chocohead:Fabric-ASM:${project.fabric_asm_version}"
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
+	compile 'com.google.guava:guava:23.5-jre'
+	modCompile "com.github.Chocohead:Fabric-ASM:${project.fabric_asm_version}"
 	include "com.github.Chocohead:Fabric-ASM:${project.fabric_asm_version}"
 
 	//Used to handle the zip processing
@@ -55,62 +47,60 @@ dependencies {
 	//Required for zt-zip, kinda annoying
 	include "org.slf4j:slf4j-simple:${project.slf4j_version}"
 	include "org.slf4j:slf4j-api:${project.slf4j_version}"
+
+	// Hacks that make mac os work
+	if (System.getProperty("os.name").toLowerCase().contains("mac")) {
+		implementation 'org.lwjgl.lwjgl:lwjgl_util:2.9.4-nightly-20150209'
+		implementation 'org.lwjgl.lwjgl:lwjgl:2.9.4-nightly-20150209'
+		implementation 'org.lwjgl.lwjgl:lwjgl-platform:2.9.4-nightly-20150209'
+	}
 }
 
-task unzip(type: Copy) {
-	def zipFile = file("${project.buildDir}/libs/${archivesBaseName}-${version}.jar")
-	def outputDir = file("${buildDir}/unpacked/dist")
-
-	if(outputDir.exists()){
-		outputDir.deleteDir()
+// More hacks that make mac os work
+if (System.getProperty("os.name").toLowerCase().contains("mac")) {
+	configurations.all {
+		resolutionStrategy {
+			dependencySubstitution {
+				substitute module('org.lwjgl.lwjgl:lwjgl_util:2.9.2-nightly-201408222') with module('org.lwjgl.lwjgl:lwjgl_util:2.9.4-nightly-20150209')
+				substitute module('org.lwjgl.lwjgl:lwjgl:2.9.2-nightly-201408222') with module('org.lwjgl.lwjgl:lwjgl:2.9.4-nightly-20150209')
+			}
+			force 'org.lwjgl.lwjgl:lwjgl-platform:2.9.4-nightly-20150209'
+		}
 	}
-
-	from zipTree(zipFile)
-	into outputDir
 }
 
 processResources {
 	inputs.property "version", project.version
 
-	from(sourceSets.main.resources.srcDirs) {
-		include "fabric.mod.json"
+	filesMatching("fabric.mod.json") {
 		expand "version": project.version
-	}
-
-	from(sourceSets.main.resources.srcDirs) {
-		exclude "fabric.mod.json"
 	}
 }
 
 // ensure that the encoding is set to UTF-8, no matter what the system default is
 // this fixes some edge cases with special characters not displaying correctly
 // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
-tasks.withType(JavaCompile) {
-	options.encoding = "UTF-8"
+tasks.withType(JavaCompile).configureEach {
+	it.options.encoding = "UTF-8"
 }
 
-// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-// if it is present.
-// If you remove this task, sources will not be generated.
-task sourcesJar(type: Jar, dependsOn: classes) {
-	getArchiveClassifier().set("sources")
-	from sourceSets.main.allSource
+java {
+	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+	// if it is present.
+	// If you remove this line, sources will not be generated.
 }
 
 jar {
-	from "LICENSE"
+	from("LICENSE") {
+		rename { "${it}_${project.archivesBaseName}"}
+	}
 }
 
+// configure the maven publication
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
-			// add all the jars that should be included when publishing to maven
-			artifact(remapJar) {
-				builtBy remapJar
-			}
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
+			from components.java
 		}
 	}
 

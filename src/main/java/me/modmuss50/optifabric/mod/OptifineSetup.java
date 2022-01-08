@@ -30,14 +30,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -213,8 +206,9 @@ public class OptifineSetup {
 	}
 
 	//Gets the minecraft libraries
+	@SuppressWarnings("deprecation")
 	List<Path> getLibs() {
-		return fabricLauncher.getLoadTimeDependencies().stream().map(url -> {
+		return net.fabricmc.loader.launch.common.FabricLauncherBase.getLauncher().getLoadTimeDependencies().stream().map(url -> {
 			try {
 				return UrlUtil.asPath(url);
 			} catch (URISyntaxException e) {
