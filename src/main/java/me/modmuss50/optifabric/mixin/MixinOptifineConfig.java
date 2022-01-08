@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Pseudo
-@Mixin(targets = "net.optifine.Config")
+@Mixin(targets = "Config")
 public class MixinOptifineConfig {
 
 	@Shadow
