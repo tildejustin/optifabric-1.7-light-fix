@@ -213,8 +213,9 @@ public class OptifineSetup {
 	}
 
 	//Gets the minecraft librarys
+	@SuppressWarnings("deprecation")
 	List<Path> getLibs() {
-		return fabricLauncher.getLoadTimeDependencies().stream().map(url -> {
+		return net.fabricmc.loader.launch.common.FabricLauncherBase.getLauncher().getLoadTimeDependencies().stream().map(url -> {
 			try {
 				return UrlUtil.asPath(url);
 			} catch (URISyntaxException e) {
