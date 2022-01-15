@@ -3,17 +3,12 @@ package me.modmuss50.optifabric.mixin;
 import me.modmuss50.optifabric.mod.Optifabric;
 import me.modmuss50.optifabric.mod.OptifabricError;
 import me.modmuss50.optifabric.mod.OptifineVersion;
-
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.text.Text;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.MathHelper;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(TitleScreen.class)

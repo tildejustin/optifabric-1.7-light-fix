@@ -1,15 +1,14 @@
 package me.modmuss50.optifabric.mod;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import me.modmuss50.optifabric.patcher.ASMUtils;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.main.Main;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.zeroturnaround.zip.ZipUtil;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 

@@ -5,7 +5,6 @@ import net.fabricmc.tinyremapper.MemberInstance;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
