@@ -11,35 +11,10 @@ public class OptifineFixer {
 
 	public static final OptifineFixer INSTANCE = new OptifineFixer();
 
-	private HashMap<String, List<ClassFixer>> classFixes = new HashMap<>();
-	private List<String> skippedClass = new ArrayList<>();
+	private final HashMap<String, List<ClassFixer>> classFixes = new HashMap<>();
+	private final List<String> skippedClass = new ArrayList<>();
 
 	private OptifineFixer() {
-		/*
-		//net/minecraft/client/render/chunk/ChunkBuilder$BuiltChunk
-		registerFix("class_851", new ChunkRendererFix());
-
-		//net/minecraft/client/render/block/BlockModelRenderer
-		registerFix("class_778", new BlockModelRendererFix());
-
-		//net/minecraft/client/Keyboard
-		registerFix("class_309", new KeyboardFix());
-
-		//net/minecraft/client/render/item/HeldItemRenderer
-		registerFix("class_759", new HeldItemRendererFix());
-
-		//net/minecraft/client/texture/SpriteAtlasTexture
-		registerFix("class_1059", new SpriteAtlasTextureFix());
-
-		//net/minecraft/server/world/ThreadedAnvilChunkStorage
-		registerFix("class_3898", new ThreadedAnvilChunkStorageFix());
-
-		//net/minecraft/client/particle/ParticleManager
-		skipClass("class_702");
-
-		//net/minecraft/client/render/item/HeldItemRenderer$1
-		skipClass("class_759$1");
-		*/
 	}
 
 	private void registerFix(String className, ClassFixer classFixer) {

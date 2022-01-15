@@ -2,9 +2,7 @@ package me.modmuss50.optifabric.mod;
 
 import com.chocohead.mm.api.ClassTinkerers;
 import me.modmuss50.optifabric.patcher.ASMUtils;
-import me.modmuss50.optifabric.patcher.fixes.ChunkRendererFix;
 import me.modmuss50.optifabric.patcher.ClassCache;
-import me.modmuss50.optifabric.patcher.fixes.ClassFixer;
 import me.modmuss50.optifabric.patcher.fixes.OptifineFixer;
 import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.Opcodes;
@@ -12,7 +10,6 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.MethodNode;
-
 
 import java.io.BufferedReader;
 import java.io.IOException;

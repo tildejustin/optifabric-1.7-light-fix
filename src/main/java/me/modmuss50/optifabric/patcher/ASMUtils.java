@@ -7,7 +7,6 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.jar.JarEntry;
