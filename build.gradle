@@ -36,12 +36,12 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	compile 'com.google.guava:guava:23.5-jre'
-	modCompile "com.github.Chocohead:Fabric-ASM:${project.fabric_asm_version}"
+	implementation 'com.google.guava:guava:23.5-jre'
+	modImplementation "com.github.Chocohead:Fabric-ASM:${project.fabric_asm_version}"
 	include "com.github.Chocohead:Fabric-ASM:${project.fabric_asm_version}"
 
 	//Used to handle the zip processing
-	compile "org.zeroturnaround:zt-zip:${project.zt_zip_version}"
+	implementation "org.zeroturnaround:zt-zip:${project.zt_zip_version}"
 	include "org.zeroturnaround:zt-zip:${project.zt_zip_version}"
 
 	//Required for zt-zip, kinda annoying

@@ -29,6 +29,8 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static net.fabricmc.loader.launch.common.FabricLauncherBase.*;
+
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class OptifineSetup {
 
@@ -201,16 +203,9 @@ public class OptifineSetup {
 		return TinyRemapperMappingsHelper.create(mappingsNew, from, to);
 	}
 
-	//Gets the minecraft libraries
-	@SuppressWarnings("deprecation")
+	//Gets the minecraft librarys
 	List<Path> getLibs() {
-		return net.fabricmc.loader.launch.common.FabricLauncherBase.getLauncher().getLoadTimeDependencies().stream().map(url -> {
-			try {
-				return UrlUtil.asPath(url);
-			} catch (URISyntaxException e) {
-				throw new RuntimeException(e);
-			}
-		}).filter(Files::exists).collect(Collectors.toList());
+		return getLauncher().getLoadTimeDependencies().stream().map(UrlUtil::asPath).filter(Files::exists).collect(Collectors.toList());
 	}
 
 	//Gets the offical minecraft jar
@@ -269,11 +264,10 @@ public class OptifineSetup {
 		URL url;
 		if ((url = loader.getResource(filename)) != null) {
 			try {
-				URL urlSource = UrlUtil.getSource(filename, url);
-				Path classSourceFile = UrlUtil.asPath(urlSource);
+				Path urlSource = UrlUtil.getCodeSource(url, filename);
 
-				return Optional.of(classSourceFile);
-			} catch (UrlConversionException | URISyntaxException e) {
+				return Optional.of(urlSource);
+			} catch (UrlConversionException e) {
 				// TODO: Point to a logger
 				e.printStackTrace();
 			}
