@@ -5,6 +5,7 @@ import me.modmuss50.optifabric.patcher.LambadaRebuiler;
 import me.modmuss50.optifabric.patcher.PatchSplitter;
 import me.modmuss50.optifabric.patcher.RemapUtils;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.impl.launch.FabricLauncher;
 import net.fabricmc.loader.impl.launch.FabricLauncherBase;
 import net.fabricmc.loader.impl.launch.MappingConfiguration;
@@ -22,10 +23,12 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.zeroturnaround.zip.ZipUtil;
 
 import java.io.*;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -205,75 +208,72 @@ public class OptifineSetup {
 
 	//Gets the minecraft librarys
 	List<Path> getLibs() {
-		return getLauncher().getLoadTimeDependencies().stream().map(UrlUtil::asPath).filter(Files::exists).collect(Collectors.toList());
+		return net.fabricmc.loader.launch.common.FabricLauncherBase.getLauncher().getLoadTimeDependencies().stream().map(UrlUtil::asPath).filter(Files::exists).collect(Collectors.toList());
 	}
 
 	//Gets the offical minecraft jar
 	Path getMinecraftJar() throws FileNotFoundException {
-		Optional<Path> entrypointResult = findFirstClass(Knot.class.getClassLoader(), Collections.singletonList("net.minecraft.client.main.Main"));
-		if (!entrypointResult.isPresent()) {
-			throw new RuntimeException("Failed to find minecraft jar");
-		}
-		if (!Files.exists(entrypointResult.get())) {
-			throw new RuntimeException("Failed to locate minecraft jar");
-		}
-		if (fabricLauncher.isDevelopment()) {
-			Path path = entrypointResult.get().getParent();
-			Path minecraftJar = path.resolve(String.format("minecraft-%s-client.jar", OptifineVersion.minecraftVersion)); //Lets hope you are using loom in dev
-//			Path minecraftJar = Paths.get("C:/Users/hayden/.gradle/caches/fabric-loom/minecraft-1.8.9-client.jar");
-			if (!Files.exists(minecraftJar)) {
-				return getNewMinecraftDevJar();
-			}
-			return minecraftJar;
-		}
-		return entrypointResult.get();
-	}
+		String givenJar = System.getProperty("optifabric.mc-jar");
+		if (givenJar != null) {
+			File givenJarFile = new File(givenJar);
 
-	//Loom 0.2.7 fallback
-	Path getNewMinecraftDevJar() throws FileNotFoundException {
-		Optional<Path> entrypointResult = getSource(Knot.class.getClassLoader(), "mappings/mappings.tiny");
-
-		if (entrypointResult.isPresent()) {
-			Path path = entrypointResult.get().getParent();
-			Path minecraftJar = path.resolve(String.format("minecraft-%s-client.jar", OptifineVersion.minecraftVersion)); //Lets hope you are using loom in dev
-			if (Files.exists(minecraftJar)) {
-				return minecraftJar;
+			if (givenJarFile.exists()) {
+				return givenJarFile.toPath();
+			} else {
+				System.err.println("Supplied Minecraft jar at " + givenJar + " doesn't exist, falling back");
 			}
 		}
 
-		throw new FileNotFoundException("Could not find minecraft jar!");
-	}
+		Path minecraftJar = getLaunchMinecraftJar();
 
-	//Stolen from fabric loader
-	static Optional<Path> findFirstClass(ClassLoader loader, List<String> classNames) {
-		List<String> entrypointFilenames = classNames.stream().map((ep) -> ep.replace('.', '/') + ".class").collect(Collectors.toList());
+		if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+			Path officialNames = minecraftJar.resolveSibling(String.format("minecraft-%s-client.jar", OptifineVersion.minecraftVersion));
 
-		for (int i = 0; i < entrypointFilenames.size(); i++) {
-			String className = classNames.get(i);
-			String classFilename = entrypointFilenames.get(i);
-			Optional<Path> classSourcePath = getSource(loader, classFilename);
-			if (classSourcePath.isPresent()) {
-				return classSourcePath;
+			if (Files.notExists(officialNames)) {
+				Path parent = minecraftJar.getParent().resolveSibling(String.format("minecraft-%s-client.jar", OptifineVersion.minecraftVersion));
+
+				if (Files.notExists(parent)) {
+					Path alternativeParent = parent.resolveSibling("minecraft-client.jar");
+
+					if (Files.notExists(alternativeParent)) {
+						throw new AssertionError("Unable to find Minecraft dev jar! Tried " + officialNames + ", " + parent + " and " + alternativeParent
+								+ "\nPlease supply it explicitly with -Doptifabric.mc-jar");
+					}
+
+					parent = alternativeParent;
+				}
+
+				officialNames = parent;
 			}
+
+			minecraftJar = officialNames;
 		}
 
-		return Optional.empty();
+		return minecraftJar;
 	}
 
-	static Optional<Path> getSource(ClassLoader loader, String filename) {
-		URL url;
-		if ((url = loader.getResource(filename)) != null) {
+	private static Path getLaunchMinecraftJar() {
+		try {
+			return (Path) FabricLoader.getInstance().getObjectShare().get("fabric-loader:inputGameJar");
+		} catch (NoClassDefFoundError | NoSuchMethodError old) {
+			ModContainer mod = FabricLoader.getInstance().getModContainer("minecraft").orElseThrow(() -> new IllegalStateException("No Minecraft?"));
+			URI uri = mod.getRootPaths().get(0).toUri();
+			assert "jar".equals(uri.getScheme());
+
+			String path = uri.getSchemeSpecificPart();
+			int split = path.lastIndexOf("!/");
+
+			if (path.substring(0, split).indexOf(' ') > 0 && path.startsWith("file:///")) {//This is meant to be a URI...
+				Path out = Paths.get(path.substring(8, split));
+				if (Files.exists(out)) return out;
+			}
+
 			try {
-				Path urlSource = UrlUtil.getCodeSource(url, filename);
-
-				return Optional.of(urlSource);
-			} catch (UrlConversionException e) {
-				// TODO: Point to a logger
-				e.printStackTrace();
+				return Paths.get(new URI(path.substring(0, split)));
+			} catch (URISyntaxException e) {
+				throw new RuntimeException("Failed to find Minecraft jar from " + uri + " (calculated " + path.substring(0, split) + ')', e);
 			}
 		}
-
-		return Optional.empty();
 	}
 
 	//Extracts the devtime mappings out of yarn into a file
