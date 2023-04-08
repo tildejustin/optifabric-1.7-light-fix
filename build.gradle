@@ -2,7 +2,8 @@
 //file:noinspection GradlePackageUpdate
 
 plugins {
-	id 'fabric-loom' version "0.7-SNAPSHOT" // To use chocoloom, change the version to a commit hash
+	id 'fabric-loom' version "1.1-SNAPSHOT" // To use chocoloom, change the version to a commit hash
+	id 'legacy-looming' version "1.1-SNAPSHOT" // To use chocoloom, change the version to a commit hash
 	id 'maven-publish'
 }
 
@@ -14,26 +15,26 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
-	maven {
-		name = "legacy-fabric"
-		url = "https://maven.legacyfabric.net"
-	}
 	mavenCentral()
 	maven { url 'https://jitpack.io' }
 }
 
 // Comment out this block if you're using Chocoloom
 // Comment when using loom 0.10
-minecraft {
-	accessWidener = file("src/main/resources/optifabric.accesswidener")
-	intermediaryUrl = {
-		return "https://maven.legacyfabric.net/net/fabricmc/intermediary/" + it + "/intermediary-" + it + "-v2.jar"
-	}
+loom {
+	accessWidenerPath = file("src/main/resources/optifabric.accesswidener")
+	setIntermediaryUrl('https://repo.legacyfabric.net/repository/legacyfabric/net/legacyfabric/intermediary/%1$s/intermediary-%1$s-v2.jar')
+
+	 runs {
+	 	client {
+	 		programArgs "--userProperties", "{}"
+	 	}
+	 }
 }
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+	mappings "net.legacyfabric:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	implementation 'com.google.guava:guava:23.5-jre'
@@ -48,25 +49,6 @@ dependencies {
 	include "org.slf4j:slf4j-simple:${project.slf4j_version}"
 	include "org.slf4j:slf4j-api:${project.slf4j_version}"
 
-	// Hacks that make mac os work
-	if (System.getProperty("os.name").toLowerCase().contains("mac")) {
-		implementation 'org.lwjgl.lwjgl:lwjgl_util:2.9.4-nightly-20150209'
-		implementation 'org.lwjgl.lwjgl:lwjgl:2.9.4-nightly-20150209'
-		implementation 'org.lwjgl.lwjgl:lwjgl-platform:2.9.4-nightly-20150209'
-	}
-}
-
-// More hacks that make mac os work
-if (System.getProperty("os.name").toLowerCase().contains("mac")) {
-	configurations.all {
-		resolutionStrategy {
-			dependencySubstitution {
-				substitute module('org.lwjgl.lwjgl:lwjgl_util:2.9.2-nightly-201408222') with module('org.lwjgl.lwjgl:lwjgl_util:2.9.4-nightly-20150209')
-				substitute module('org.lwjgl.lwjgl:lwjgl:2.9.2-nightly-201408222') with module('org.lwjgl.lwjgl:lwjgl:2.9.4-nightly-20150209')
-			}
-			force 'org.lwjgl.lwjgl:lwjgl-platform:2.9.4-nightly-20150209'
-		}
-	}
 }
 
 processResources {

@@ -3,3 +3,4 @@ accessWidener   v1  named
 accessible method net/minecraft/block/Block setOpacity (I)Lnet/minecraft/block/Block;
 accessible field net/minecraft/entity/LivingEntity despawnCounter I
 accessible field net/minecraft/resource/AbstractFileResourcePack base Ljava/io/File;
+accessible class net/minecraft/client/network/AbstractClientPlayerEntity
