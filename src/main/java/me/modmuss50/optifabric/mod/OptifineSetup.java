@@ -1,7 +1,7 @@
 package me.modmuss50.optifabric.mod;
 
 import me.modmuss50.optifabric.patcher.ClassCache;
-import me.modmuss50.optifabric.patcher.LambadaRebuiler;
+import me.modmuss50.optifabric.patcher.LambdaRebuilder;
 import me.modmuss50.optifabric.patcher.PatchSplitter;
 import me.modmuss50.optifabric.patcher.RemapUtils;
 import net.fabricmc.loader.api.FabricLoader;
@@ -9,8 +9,6 @@ import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.impl.launch.FabricLauncher;
 import net.fabricmc.loader.impl.launch.FabricLauncherBase;
 import net.fabricmc.loader.impl.launch.MappingConfiguration;
-import net.fabricmc.loader.impl.launch.knot.Knot;
-import net.fabricmc.loader.impl.util.UrlConversionException;
 import net.fabricmc.loader.impl.util.UrlUtil;
 import net.fabricmc.loader.impl.util.mappings.TinyRemapperMappingsHelper;
 import net.fabricmc.mapping.reader.v2.TinyMetadata;
@@ -25,14 +23,11 @@ import org.zeroturnaround.zip.ZipUtil;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static net.fabricmc.loader.launch.common.FabricLauncherBase.*;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class OptifineSetup {
@@ -57,8 +52,8 @@ public class OptifineSetup {
 			versionDir.mkdirs();
 		}
 
-		File remappedJar = new File(versionDir, "Optifine-mapped.jar");
-		File optifinePatches = new File(versionDir, "Optifine.classes");
+		File remappedJar = new File(versionDir, "optifine-mapped.jar");
+		File optifinePatches = new File(versionDir, "optifine.classes");
 
 		ClassCache classCache = null;
 		if(remappedJar.exists() && optifinePatches.exists()){
@@ -76,8 +71,8 @@ public class OptifineSetup {
 			return Pair.of(remappedJar, classCache);
 		}
 
-		if (OptifineVersion.jarType == OptifineVersion.JarType.OPTFINE_INSTALLER) {
-			File optifineMod = new File(versionDir, "/Optifine-mod.jar");
+		if (OptifineVersion.jarType == OptifineVersion.JarType.OPTIFINE_INSTALLER) {
+			File optifineMod = new File(versionDir, "/optifine-mod.jar");
 			if (!optifineMod.exists()) {
 				OptifineInstaller.extract(optifineModJar, optifineMod, getMinecraftJar().toFile());
 			}
@@ -87,7 +82,7 @@ public class OptifineSetup {
 		System.out.println("Setting up optifine for the first time, this may take a few seconds.");
 
 		//A jar without srgs
-		File jarOfTheFree = new File(versionDir, "/Optifine-jarofthefree.jar");
+		File jarOfTheFree = new File(versionDir, "/optifine-jar-of-the-free.jar");
 		List<String> srgs = new ArrayList<>();
 
 		System.out.println("De-Volderfiying jar");
@@ -118,12 +113,12 @@ public class OptifineSetup {
 		ZipUtil.removeEntries(optifineModJar, srgs.toArray(new String[0]), jarOfTheFree);
 
 		System.out.println("Building lambada fix mappings");
-		LambadaRebuiler rebuiler = new LambadaRebuiler(jarOfTheFree, getMinecraftJar().toFile());
-		rebuiler.buildLambadaMap();
+		LambdaRebuilder rebuilder = new LambdaRebuilder(jarOfTheFree, getMinecraftJar().toFile());
+		rebuilder.buildLambadaMap();
 
 		System.out.println("Remapping optifine with fixed lambada names");
-		File lambadaFixJar = new File(versionDir, "/Optifine-lambadafix.jar");
-		RemapUtils.mapJar(lambadaFixJar.toPath(), jarOfTheFree.toPath(), rebuiler, getLibs());
+		File lambadaFixJar = new File(versionDir, "/optifine-lambda-fix.jar");
+		RemapUtils.mapJar(lambadaFixJar.toPath(), jarOfTheFree.toPath(), rebuilder, getLibs());
 
 		remapOptifine(lambadaFixJar.toPath(), remappedJar);
 
@@ -133,7 +128,7 @@ public class OptifineSetup {
 		lambadaFixJar.delete();
 		jarOfTheFree.delete();
 
-		if(OptifineVersion.jarType == OptifineVersion.JarType.OPTFINE_INSTALLER){
+		if(OptifineVersion.jarType == OptifineVersion.JarType.OPTIFINE_INSTALLER){
 			optifineModJar.delete();
 		}
 
@@ -166,14 +161,14 @@ public class OptifineSetup {
 	}
 
 	//Optifine currently has two fields that match the same name as Yarn mappings, we'll rename Optifine's to something else
-	IMappingProvider createMappings(String from, String to) {
+	IMappingProvider createMappings(@SuppressWarnings("SameParameterValue") String from, String to) {
 		//In dev
 		if (fabricLauncher.isDevelopment()) {
 			try {
 				File fullMappings = extractMappings();
 				return (out) -> {
 					RemapUtils.getTinyRemapper(fullMappings, from, to).load(out);
-					//TODO use the mappings API here to stop neededing to change this each version
+					//TODO use the mappings API here to stop needing to change this each version
 					out.acceptField(new IMappingProvider.Member("dbq", "CLOUDS", "Ldbe;"),
 							"CLOUDS_OF");
 					out.acceptField(new IMappingProvider.Member("dqr", "renderDistance", "I"),
@@ -212,7 +207,7 @@ public class OptifineSetup {
 	}
 
 	//Gets the offical minecraft jar
-	Path getMinecraftJar() throws FileNotFoundException {
+	Path getMinecraftJar() {
 		String givenJar = System.getProperty("optifabric.mc-jar");
 		if (givenJar != null) {
 			File givenJarFile = new File(givenJar);
@@ -276,7 +271,7 @@ public class OptifineSetup {
 		}
 	}
 
-	//Extracts the devtime mappings out of yarn into a file
+	//Extracts the dev-time mappings out of yarn into a file
 	File extractMappings() throws IOException {
 		File extractedMappings = new File(versionDir, "mappings.tiny");
 		if (extractedMappings.exists()) {
@@ -295,7 +290,7 @@ public class OptifineSetup {
 	}
 
 	byte[] fileHash(File input) throws IOException {
-		try (InputStream is = new FileInputStream(input)) {
+		try (InputStream is = Files.newInputStream(input.toPath())) {
 			return DigestUtils.md5(is);
 		}
 	}

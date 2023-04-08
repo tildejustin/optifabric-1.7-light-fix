@@ -9,8 +9,7 @@ public class Optifabric implements ModInitializer {
 
 	public static void checkForErrors() {
 		if (OptifabricError.hasError()) {
-			System.out.println("An OptiFabric error has occurred");
-			System.out.println(-1);
+			System.out.println("An Optifabric error has occurred");
 		}
 	}
 

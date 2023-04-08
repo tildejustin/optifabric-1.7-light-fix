@@ -19,9 +19,9 @@ public class MixinReflectorClass {
 	private boolean checked;
 
 	@SuppressWarnings("UnresolvedMixinReference")
-	@Inject(method = "getTargetClass", at = @At("HEAD"), cancellable = true, remap = false)
+	@Inject(method = "getTargetClass", at = @At("HEAD"), remap = false)
 	private void getTargetClass(CallbackInfoReturnable<Class<?>> infoReturnable) {
-		if (!checked) {//Only check the target if it hasn't been done yet
+		if (!checked) { //Only check the target if it hasn't been done yet
 			String name = targetClassName.replaceAll("/", ".");
 			if (name.startsWith("net.minecraft.launchwrapper") || name.startsWith("net.minecraftforge") || "optifine.OptiFineClassTransformer".equals(name)) {
 				checked = true;

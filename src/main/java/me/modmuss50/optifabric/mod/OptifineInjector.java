@@ -3,7 +3,6 @@ package me.modmuss50.optifabric.mod;
 import com.chocohead.mm.api.ClassTinkerers;
 import me.modmuss50.optifabric.patcher.ASMUtils;
 import me.modmuss50.optifabric.patcher.ClassCache;
-import me.modmuss50.optifabric.patcher.fixes.OptifineFixer;
 import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -11,11 +10,6 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.MethodNode;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -24,8 +18,7 @@ public class OptifineInjector {
 
 	ClassCache classCache;
 
-	private static List<String> patched = new ArrayList<>();
-	private final OptifineFixer optifineFixer = OptifineFixer.INSTANCE;
+	private static final List<String> patched = new ArrayList<>();
 
 	public OptifineInjector(ClassCache classCache) {
 		this.classCache = classCache;
@@ -47,16 +40,6 @@ public class OptifineInjector {
 		//I cannot imagine this being very good at all
 		ClassNode source = getSourceClassNode(target);
 
-
-		//Skip applying classes
-		if (optifineFixer.shouldSkip(target.name)) {
-			return;
-		}
-
-		//Patch the class if required
-		optifineFixer.getFixers(target.name)
-				.forEach(classFixer -> classFixer.fix(source, target));
-
 		target.methods = source.methods;
 		target.fields = source.fields;
 		target.interfaces = source.interfaces;
@@ -74,7 +57,7 @@ public class OptifineInjector {
 			}
 		}
 
-		// Lets make every class we touch public
+		// Let's make every class we touch public
 		if (!FabricLoader.getInstance().isDevelopmentEnvironment()) {
 			target.access = modAccess(target.access);
 			target.methods.forEach(methodNode -> methodNode.access = modAccess(methodNode.access));
@@ -97,17 +80,6 @@ public class OptifineInjector {
 			throw new RuntimeException("Failed to find patched class for: " + name);
 		}
 		return ASMUtils.readClassFromBytes(bytes);
-	}
-
-	public String toString(InputStream inputStream, Charset charset) throws IOException {
-		StringBuilder stringBuilder = new StringBuilder();
-		String line;
-		try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, charset))) {
-			while ((line = bufferedReader.readLine()) != null) {
-				stringBuilder.append(line);
-			}
-		}
-		return stringBuilder.toString();
 	}
 
 }

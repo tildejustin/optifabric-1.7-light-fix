@@ -11,20 +11,15 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-public class LambadaRebuiler implements IMappingProvider {
+public class LambdaRebuilder implements IMappingProvider {
 
-	private File optifineFile;
-	private File minecraftClientFile;
+	private final JarFile optifineJar;
+	private final JarFile clientJar;
 
-	private JarFile optifineJar;
-	private JarFile clientJar;
+	private final Map<String, String> methodMap = new HashMap<>();
+	private final List<String> usedMethods = new ArrayList<>(); //Used to prevent duplicates
 
-	private Map<String, String> methodMap = new HashMap<>();
-	private List<String> usedMethods = new ArrayList<>(); //Used to prevent duplicates
-
-	public LambadaRebuiler(File optifineFile, File minecraftClientFile) throws IOException {
-		this.optifineFile = optifineFile;
-		this.minecraftClientFile = minecraftClientFile;
+	public LambdaRebuilder(File optifineFile, File minecraftClientFile) throws IOException {
 		optifineJar = new JarFile(optifineFile);
 		clientJar = new JarFile(minecraftClientFile);
 
@@ -59,7 +54,7 @@ public class LambadaRebuiler implements IMappingProvider {
 			throw new RuntimeException("Something went wrong");
 		}
 		for (MethodNode methodNode : lambadaNodes) {
-			MethodNode actualNode = findMethod(methodNode, classNode, minecraftClass);
+			MethodNode actualNode = findMethod(methodNode, minecraftClass);
 			if (actualNode == null) {
 				continue;
 			}
@@ -73,7 +68,7 @@ public class LambadaRebuiler implements IMappingProvider {
 		}
 	}
 
-	private MethodNode findMethod(MethodNode optifineMethod, ClassNode optifineClass, ClassNode minecraftClass) {
+	private MethodNode findMethod(MethodNode optifineMethod, ClassNode minecraftClass) {
 		{
 			MethodNode lastNode = null;
 			int identiacalMethods = 0;
